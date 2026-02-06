@@ -1,0 +1,117 @@
+---
+title: "2026_GLMM_NPFW"
+author: "Maya Killmade"
+format: html
+editor: visual
+---
+
+**---------------------------------------------Setup———————————————————————--**
+
+```{r}
+# Load in packages
+
+library(tidyverse)
+library(readxl)
+library(ggplot2)
+library(dplyr)
+```
+
+```{r}
+# Read in Data and objects
+
+Raw_Data <- read.csv("../Raw_Data/Het_Data_CSV_2.csv")
+str(Raw_Data)
+Raw_Data
+```
+
+**-----------------------------------------Data Wrangling——————————————————————-**
+
+1.  Give each row an identifier. This will help when I try to create totals by fig, per example.
+
+2.  Then, I get rid of columns that we do not need. Non dispersal sneakers and dispersal fighters do not exist, so these rows are cumbersome.
+
+3.  Here, I make NA values implicit.
+
+4.  We need to convert the wasp counts into ratios. Here, I create a new data frame with columns for male:female, fighter:female, sneaker:female, and fighter:sneaker for each genus. I create ratio values for each row here. This gives us ratio data for each fig.......
+
+    **Formulas:**
+
+    -   Male:Female = (fighter count+sneaker count)/female count
+
+    -   Fighter:Female = fighter count/female count
+
+    -   Sneaker:Female = sneaker count/female count
+
+    -   Fighter:Sneaker = fighter count/sneaker count
+
+        **QUESTION FOR DR. KING: are ratios even a good idea? Wasps will sometimes lay only males or only females. This doesn't show complete data... How can I show this?**
+
+5.  The original file had lots of wordy names. Here, I simplify them for future coding. Data are all the correct type (character, numeric, etc.).
+
+6.  I pivot the data so that the 'class' or 'sex' of the species is its own cell, and the count is its own cell. Tidying up!
+
+```{r}
+#Creating individual fig IDs
+Raw_Data <- Raw_Data |>
+  mutate(Fig_ID = row_number()) |> 
+  relocate(Fig_ID)
+
+#Delete Unnecessary Data (dispersal fighters and non-dispersal sneakers)
+No_Need_Data <- 
+  Raw_Data[,-c(9, 12, 15, 18, 21, 24, 27, 30)]
+
+#Change values to NA for tidiness
+  No_Need_Data[No_Need_Data == ""] <- NA
+  No_Need_Data[No_Need_Data == "0"] <- NA
+  No_Need_Data[No_Need_Data == "N/A"] <- NA
+
+Ratio_Data <- No_Need_Data |>
+  mutate("Male:Female" = (Fighter_Males_1 + Sneaker_Males_1)/Females_1) |>
+  mutate("Fighter:Female" = (Fighter_Males_1/Females_1)) |>
+  mutate("Sneaker:Female" = (Sneaker_Males_1/Females_1)) |> 
+  mutate("Fighter:Sneaker" = (Fighter_Males_1/Sneaker_Males_1)) |>
+  mutate("Male:Female2" = (Fighter_Males_2 + Sneaker_Males_2)/Females_2) |>
+  mutate("Fighter:Female2" = (Fighter_Males_2/Females_2)) |>
+  mutate("Sneaker:Female2" = (Sneaker_Males_2/Females_2)) |> 
+  mutate("Fighter:Sneaker2" = (Fighter_Males_2/Sneaker_Males_2)) |>
+  mutate("Male:Female3" = (Fighter_Males_3 + Sneaker_Males_3)/Females_3) |>
+  mutate("Fighter:Female3" = (Fighter_Males_3/Females_3)) |>
+  mutate("Sneaker:Female3" = (Sneaker_Males_3/Females_3)) |> 
+  mutate("Fighter:Sneaker3" = (Fighter_Males_3/Sneaker_Males_3)) |>
+  mutate("Male:Female4" = (Fighter_Males_4 + Sneaker_Male_4)/Females_4) |>
+  mutate("Fighter:Female4" = (Fighter_Males_4/Females_4)) |>
+  mutate("Sneaker:Female4" = (Sneaker_Male_4/Females_4)) |> 
+  mutate("Fighter:Sneaker4" = (Fighter_Males_4/Sneaker_Male_4))
+
+#Simplify Genus Names 
+  Ratio_Data[Ratio_Data == "Heterandrium_(Aepocerus?)1"] <- "Het_1"
+  Ratio_Data[Ratio_Data == "Heterandrium_(Aepocerus?)2"] <- "Het_2"
+  Ratio_Data[Ratio_Data == "Torymidae spp"] <- "Tory_1"
+  Ratio_Data[Ratio_Data == "Torymidae Spp2"] <- "Tory_2"
+  Ratio_Data[Ratio_Data == "Pteromalidae spp1"] <- "Ptero_1"
+  Ratio_Data[Ratio_Data == "Pteromalidae spp2"] <- "Ptero_2"
+  
+#Pivoting Data
+Long_Data <- Ratio_Data |>
+  pivot_longer(
+    cols = matches("Females_|Fighter_Males_|Sneaker_Male"),
+    names_to = c("Sex", "Species"),
+    names_pattern = "(Females|Fighter_Males|Sneaker_Male)_([0-9]+)",
+    values_to = "Count"
+  )
+
+#Much tidier data, each cell is a value. 
+```
+
+Here, I do some EDA, creating box plots that show us how ratio differs between species,
+
+```{r}
+
+```
+
+```{r}
+# Creating data frame with totals
+Totals_Data <- Long_Data |>
+  mutate(
+  
+```
